@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Simulation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sidebar-nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background-color: #1f2937;
+            color: white;
+            padding: 2rem 1rem;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+            min-height: 100vh;
+            background-color: #f9fafb;
+        }
+        
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .nav-item:hover {
+            background-color: #374151;
+        }
+        
+        .nav-item.active {
+            background-color: #06b6d4;
+            font-weight: bold;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .metric-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .algo-button {
+            padding: 0.75rem 1.5rem;
+            margin: 0.5rem;
+            background-color: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .algo-button:hover {
+            border-color: #06b6d4;
+            background-color: #ecf8fa;
+        }
+        
+        .algo-button.selected {
+            background-color: #06b6d4;
+            color: white;
+            border-color: #06b6d4;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #06b6d4;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <div class="sidebar-nav">
+        <h1 class="text-2xl font-bold mb-8" style="color: #06b6d4;">Network Sim</h1>
+        <nav>
+            <div class="nav-item active" onclick="showSection('home')">
+                <span>🏠</span>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="showSection('simulation')">
+                <span>⚡</span>
+                <span>Simulation</span>
+            </div>
+            <div class="nav-item" onclick="showSection('results')">
+                <span>📊</span>
+                <span>Results</span>
+            </div>
+            <div class="nav-item" onclick="showSection('comparison')">
+                <span>📈</span>
+                <span>Comparison</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Home Section -->
+        <div id="home" class="section active">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Network Simulation Dashboard</h2>
+            <p class="text-lg text-gray-600 mb-8">Welcome to the network energy-efficient packet routing analysis platform.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="metric-card">
+                    <div class="metric-value">A0-A4</div>
+                    <div class="metric-label">Available Algorithms</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">50-150</div>
+                    <div class="metric-label">Network Sizes</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">Real-time</div>
+                    <div class="metric-label">Analytics</div>
+                </div>
+            </div>
+
+            <div class="metric-card mt-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Features</h3>
+                <ul class="space-y-2 text-gray-600">
+                    <li>✓ Simulate network routing with various algorithms</li>
+                    <li>✓ Analyze energy consumption patterns</li>
+                    <li>✓ Compare performance metrics across algorithms</li>
+                    <li>✓ Visualize network lifetime extension</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Simulation Section -->
+        <div id="simulation" class="section">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Network Simulation</h2>
+            
+            <div class="metric-card">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Configuration</h3>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Network Size</label>
+                    <select id="networkSize" onchange="updateSimulation()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500">
+                        <option value="50">50 Nodes</option>
+                        <option value="100" selected>100 Nodes</option>
+                        <option value="150">150 Nodes</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Algorithm</label>
+                    <select id="algorithm" onchange="updateSimulation()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500">
+                        <option value="A0">A0 - Traditional Routing</option>
+                        <option value="A1">A1 - Energy-Aware Routing</option>
+                        <option value="A2">A2 - Load Balancing</option>
+                        <option value="A3">A3 - Hybrid Approach</option>
+                        <option value="A4">A4 - Optimized (Recommended)</option>
+                    </select>
+                </div>
+                
+                <button onclick="runSimulation()" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-6 rounded-lg transition">
+                    ▶ Run Simulation
+                </button>
+            </div>
+
+            <div class="metric-card">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Simulation Progress</h3>
+                <div id="progressContainer">
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>Overall Progress</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar"></div>
+                        </div>
+                    </div>
+                    <div id="simulationStatus" class="text-gray-600 text-sm">Ready to simulate...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="section">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Results Analysis</h2>
+            
+            <div class="metric-card">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Performance Metrics</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <div class="metric-value text-cyan-500">174%</div>
+                        <div class="metric-label">Network Lifetime Increase</div>
+                    </div>
+                    <div>
+                        <div class="metric-value text-green-500">82%</div>
+                        <div class="metric-label">Energy Efficiency</div>
+                    </div>
+                    <div>
+                        <div class="metric-value text-blue-500">3.2x</div>
+                        <div class="metric-label">Throughput Improvement</div>
+                    </div>
+                    <div>
+                        <div class="metric-value text-purple-500">45ms</div>
+                        <div class="metric-label">Avg Packet Delay</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <h3 class="text-xl font-bold text-gray-900 mb-4" id="resultTitle">Algorithm A4 Performance</h3>
+                <p id="resultDescription" class="text-gray-600 leading-relaxed">
+                    A4 achieves the best overall performance, extending network lifetime 174% vs A0 through holistic optimization.
+                </p>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div id="comparison" class="section">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Algorithm Comparison</h2>
+            
+            <div class="metric-card">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Select Algorithms to Compare</h3>
+                <div class="flex flex-wrap">
+                    <button class="algo-button selected" onclick="toggleAlgorithm(this, 'A0')">A0</button>
+                    <button class="algo-button" onclick="toggleAlgorithm(this, 'A1')">A1</button>
+                    <button class="algo-button" onclick="toggleAlgorithm(this, 'A2')">A2</button>
+                    <button class="algo-button" onclick="toggleAlgorithm(this, 'A3')">A3</button>
+                    <button class="algo-button" onclick="toggleAlgorithm(this, 'A4')">A4</button>
+                </div>
+            </div>
+
+            <div id="comparisonResults" class="metric-card">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Comparison Results</h3>
+                <div id="comparisonTable" class="text-gray-600">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="text-left py-2">Metric</th>
+                                <th class="text-left py-2">A0</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="py-2">Network Lifetime</td>
+                                <td class="py-2">100%</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2">Energy Efficiency</td>
+                                <td class="py-2">60%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const algorithmDescriptions = {
+            'A0': 'Traditional routing without energy optimization. Baseline performance.',
+            'A1': 'A1 uses energy-aware routing to optimize network paths based on remaining node energy.',
+            'A2': 'A2 implements load-balancing across network nodes to distribute traffic evenly.',
+            'A3': 'A3 combines energy awareness with load-balancing for improved performance.',
+            'A4': 'A4 achieves the best overall performance, extending network lifetime 174% vs A0 through holistic optimization.'
+        };
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Highlight nav item
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        function updateSimulation() {
+            const size = document.getElementById('networkSize').value;
+            const algo = document.getElementById('algorithm').value;
+            console.log(`Updated: ${size} nodes, Algorithm ${algo}`);
+        }
+
+        function runSimulation() {
+            const size = document.getElementById('networkSize').value;
+            const algo = document.getElementById('algorithm').value;
+            
+            document.getElementById('simulationStatus').textContent = `Running simulation with ${size} nodes using ${algo}...`;
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('progressBar').style.width = progress + '%';
+                document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    document.getElementById('simulationStatus').innerHTML = `<span style="color: #10b981;">✓ Simulation completed successfully!</span>`;
+                    updateResults(algo);
+                }
+            }, 300);
+        }
+
+        function updateResults(algo) {
+            document.getElementById('resultTitle').textContent = `Algorithm ${algo} Performance`;
+            document.getElementById('resultDescription').textContent = algorithmDescriptions[algo];
+        }
+
+        function toggleAl
